@@ -13,6 +13,7 @@ this file and include it in basic-server.js so that it actually works.
 **************************************************************/
 
 var fs = require('fs');
+var responseContent = {results:[]};
 
 module.exports = function(request, response) {
   // Request and Response come from node's http module.
@@ -38,33 +39,44 @@ module.exports = function(request, response) {
 
   var resultArray = [];
 
+
   var statusCode = 200;
+  headers['Content-Type'] = "application/json";
 
-  if (request.method === "POST"){
-    statusCode = 201;
-    request.on('data',function(data){
-      var datum = JSON.parse(data.toString())
-      //console.log(data.toString());
-      resultArray.push(JSON.parse(data.toString()));
+  console.log("The request method is "+request.method+" and the request url is "+request.url);
 
-    });
+  if (request.url === "/classes/messages") {
+    if (request.method === "POST"){
+      statusCode = 201;
+      response.writeHead(statusCode, headers);
+
+      request.on('data',function(data){
+        var datum = JSON.parse(data.toString());
+        responseContent.results.push(datum);
+      });
+
+      request.on('end',function(){
+        response.end(JSON.stringify(responseContent));
+      });
+    }
+    if (request.method === "GET"){
+      response.writeHead(statusCode, headers);
+      response.write(JSON.stringify(responseContent));
+      response.end();
+    }
+  } else if (request.url === "/log" && request.method === "GET"){
+    response.writeHead(statusCode, headers);
+    response.write(JSON.stringify(responseContent));
+    response.end();
+
+  } else {
+
+    statusCode = 404;
+    response.writeHead(statusCode, headers);
+    response.write(JSON.stringify(responseContent));
+    response.end();
+
   }
-
-  response.writeHead(statusCode, headers);
-  headers['Content-Type'] = "text/plain";
-  //headers['Content-Type'] = "application/json";
-
-
-  var responseContent = {results:resultArray};
-
-
-
-
-
-  response.write(JSON.stringify(responseContent));
-  response.end();
-
-
 
 
 
