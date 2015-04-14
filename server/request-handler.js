@@ -13,6 +13,7 @@ this file and include it in basic-server.js so that it actually works.
 **************************************************************/
 
 var fs = require('fs');
+var path = require('path');
 var responseContent = {results:[]};
 
 module.exports.requestHandler = function(request, response) {
@@ -45,6 +46,34 @@ module.exports.requestHandler = function(request, response) {
 
   //console.log("The request method is "+request.method+" and the request url is "+request.url);
 
+  function retrieveFile(filePath, response){
+    fs.exists(filePath, function(exists){
+      if(exists){
+        fs.readFile(filePath, function(err,contents){
+          if(!err){
+            console.log("Found and read "+filePath);
+            response.writeHead(200);
+            response.end(contents);
+          } else {
+            console.log("Failed to read "+filePath);
+            console.dir(err);
+            response.writeHead(500);
+            response.end();
+          }
+        });
+      } else {
+        console.log(filePath+ " does not exist");
+        response.writeHead(404);
+        response.end();
+      }
+    });
+  }
+
+  var fileName = path.basename(request.url) || 'index.html';
+  var localFolder = "client/";
+  retrieveFile(localFolder+fileName, response);
+
+
   if (request.url === "/classes/messages" || (/\/classes\/room\d*/).test(request.url)) {
     if (request.method === "POST"){
       statusCode = 201;
@@ -70,12 +99,21 @@ module.exports.requestHandler = function(request, response) {
     response.end(JSON.stringify(responseContent));
 
   }
-
-
-
-
-
-
+  // if(request.url === "/") {
+  //   fs.readdir(__dirname, function(error, content){
+  //     if (error){
+  //       response.writeHead(500);
+  //       console.log("Failed to retrieve index.html file.");
+  //       console.log("Error: ", error);
+  //       response.end();
+  //     }
+  //     else {
+  //       response.writeHead(200, {'Content-Type': 'text/html'});
+  //       console.log("Successfully retrieved index.html file.");
+  //       response.end(content, 'utf-8');
+  //     }
+  //   });
+  // } else
 
 
   // The outgoing status.
