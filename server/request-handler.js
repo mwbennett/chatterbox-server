@@ -15,7 +15,7 @@ this file and include it in basic-server.js so that it actually works.
 var fs = require('fs');
 var responseContent = {results:[]};
 
-module.exports = function(request, response) {
+module.exports.requestHandler = function(request, response) {
   // Request and Response come from node's http module.
   //
   // They include information about both the incoming request, such as
@@ -43,7 +43,7 @@ module.exports = function(request, response) {
   var statusCode = 200;
   headers['Content-Type'] = "application/json";
 
-  console.log("The request method is "+request.method+" and the request url is "+request.url);
+  //console.log("The request method is "+request.method+" and the request url is "+request.url);
 
   if (request.url === "/classes/messages" || (/\/classes\/room\d*/).test(request.url)) {
     if (request.method === "POST"){
@@ -61,15 +61,13 @@ module.exports = function(request, response) {
     }
     if (request.method === "GET"){
       response.writeHead(statusCode, headers);
-      response.write(JSON.stringify(responseContent));
-      response.end();
+      response.end(JSON.stringify(responseContent));
     }
   } else {
 
     statusCode = 404;
     response.writeHead(statusCode, headers);
-    response.write(JSON.stringify(responseContent));
-    response.end();
+    response.end(JSON.stringify(responseContent));
 
   }
 
