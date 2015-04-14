@@ -45,7 +45,7 @@ module.exports = function(request, response) {
 
   console.log("The request method is "+request.method+" and the request url is "+request.url);
 
-  if (request.url === "/classes/messages") {
+  if (request.url === "/classes/messages" || (/\/classes\/room\d*/).test(request.url)) {
     if (request.method === "POST"){
       statusCode = 201;
       response.writeHead(statusCode, headers);
@@ -64,11 +64,6 @@ module.exports = function(request, response) {
       response.write(JSON.stringify(responseContent));
       response.end();
     }
-  } else if (request.url === "/log" && request.method === "GET"){
-    response.writeHead(statusCode, headers);
-    response.write(JSON.stringify(responseContent));
-    response.end();
-
   } else {
 
     statusCode = 404;
